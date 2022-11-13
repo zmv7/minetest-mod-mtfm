@@ -1,3 +1,5 @@
+local ro = core.settings:get("mtfm.read_only")
+
 mtfm = {}
 mtfm.last_path = {}
 mtfm.last_editor_path = {}
@@ -38,11 +40,13 @@ local function fm_fs(name, path)
 		"button[0.1,11;1.5,1;modlist;Modlist]" ..
 		"button[1.4,11;1.5,1;toworldpath;Worldpath]" ..
 		"button[2.7,11;1.5,1;edit;Edit]" ..
-		"button[10.6,11;1.5,1;newfile;New file]" ..
+		"button[14.5,11;1.5,1;open;Open]"
+	if not ro then
+		fs = fs .. "button[10.6,11;1.5,1;newfile;New file]" ..
 		"button[9.3,11;1.5,1;newdir;New dir]" ..
 		"button[11.9,11;1.5,1;del;Delete]" ..
-		"button[13.2,11;1.5,1;copy;Copy]" ..
-		"button[14.5,11;1.5,1;open;Open]"
+		"button[13.2,11;1.5,1;copy;Copy]"
+	end
 		mtfm.last_path[name] = path
 		core.show_formspec(name, "mtfm:fm", fs)
 end
@@ -70,8 +74,10 @@ local function editor_fs(name, path, new)
 		"field[1.2,0.3;13.5,1;path;;"..F(path).."]" ..
 		"field_close_on_enter[path;false]" ..
 		"button[14.2,0;1,1;open;Open]" ..
-		"button[15,0;1,1;save;Save]" ..
 		"textarea[0.3,1;16,13;content;;"..F(text).."]"
+	if not ro then
+		fs = fs .. "button[15,0;1,1;save;Save]"
+	end
 	mtfm.last_editor_path[name] = path
 	core.show_formspec(name, "mtfm:editor", fs)
 end
@@ -98,7 +104,7 @@ core.register_chatcommand("mtfm",{
 end})
 
 core.register_on_player_receive_fields(function(player, formname, fields)
-	--core.chat_send_all(dump(fields,''))
+	--core.chat_send_all(dump(fields,''))  --for debug
 	local name = player:get_player_name()
 	if not name then return end
 	local dirlist = mtfm.dirlist[name]
@@ -150,16 +156,16 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 			local newpath = fields.path:gsub("/"..splitted[#splitted]:gsub('([^%w])','%%%1'),"") or worldpath
 			fm_fs(name, newpath)
 		end
-		if fields.newdir then
+		if fields.newdir and not ro  then
 			core.show_formspec(name, "mtfm:newdir_dialog", 	"size[8,2]"..
 			"field[0.3,0.1;8,1;dirname;;NewDir]"..
 		"field_close_on_enter[path;false]"..
 		"button[3,1;2,1;accept;Accept]")
 		end
-		if fields.newfile then
+		if fields.newfile and not ro then
 			editor_fs(name,mtfm.last_path[name].."/new.txt", true)
 		end
-		if fields.del then
+		if fields.del and not ro then
 			local elem = dirlist[mtfm.selected[name]]
 			if not elem or elem == "" then
 				core.chat_send_player(name, "Please select file/dir")
@@ -169,7 +175,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 			core.chat_send_player(name, err and "Error deleting" or "Deleted successfully")
 			fm_fs(name, mtfm.last_path[name])
 		end
-		if fields.copy then
+		if fields.copy and not ro then
 			local elem = dirlist[mtfm.selected[name]]
 			if not elem or elem == "" then
 				core.chat_send_player(name, "Please select file/dir")
@@ -199,7 +205,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 		end
 	end
 	if formname == "mtfm:newdir_dialog" then
-		if (fields.accept or fields.key_enter_field) and fields.dirname and fields.dirname ~= "" then
+		if (fields.accept or fields.key_enter_field) and fields.dirname and fields.dirname ~= "" and not ro then
 			local err = safe_run("core.mkdir(mtfm.last_path['"..name.."']..'/'..'"..fields.dirname.."')")
 			core.chat_send_player(name, err and "Error creating new directory" or "Successfully created new directory")
 			fm_fs(name, mtfm.last_path[name])
@@ -212,7 +218,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 		if (fields.open or fields.key_enter_field) and fields.path and fields.path ~= "" then
 			editor_fs(name, fields.path)
 		end
-		if fields.save and fields.path and fields.path ~= "" then
+		if fields.save and fields.path and fields.path ~= "" and not ro then
 			local content = fields.content
 			if content then
 				local err = safe_run("core.safe_file_write('"..fields.path.."', '"..content.."')")
