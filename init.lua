@@ -144,8 +144,8 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 				core.sound_play(elem:gsub(".ogg",""), {to_player=name})
 				return
 			end
-			local file = io.open(mtfm.last_path[name].."/"..elem)
-			if file:read() then
+			local err = safe_run("mtfm.file['"..name.."'] = io.open('"..mtfm.last_path[name].."'..'/'..'"..elem.."')")
+			if not err and mtfm.file[name] and mtfm.file[name]:read() then
 				editor_fs(name,mtfm.last_path[name].."/"..elem)
 			else
 				fm_fs(name, mtfm.last_path[name].."/"..elem)
