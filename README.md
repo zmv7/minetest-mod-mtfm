@@ -1,5 +1,6 @@
 # minetest-mod-mtfm
-Formspec-based file manager with text editor and image viewer
+Formspec-based file manager with text editor and image viewer  
+![ContentDB](https://content.minetest.net/packages/Zemtzov7/mtfm/shields/downloads/)
 ### Usage
 * Chatcommand `/mtfm [path]` - open file manager, optionally path(absolute) can be specified
 * Click `Modlist` button to get list of installed mods, then you can browse their files
