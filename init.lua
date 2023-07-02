@@ -12,7 +12,7 @@ local modlist = core.get_modnames() or {"Failed to load modlist"}
 local worldpath = core.get_worldpath()
 local F = core.formspec_escape
 
-function safe_run(code)
+local function safe_run(code)
 	local func, err = loadstring(code)
 	if not func then  -- Syntax error
 		return err
