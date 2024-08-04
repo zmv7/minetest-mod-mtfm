@@ -43,13 +43,8 @@ local function fm_fs(name, path)
 	for i,elem in ipairs(dirlist) do
 		local file = io.open(path.."/"..elem, "r")
 		if file then
-			if isdir(file) then
-				dirlist[i] = dirlist[i]..",<dir>"
-				file:close()
-			else
-				dirlist[i] = dirlist[i]..","..btoh(file:seek("end"))
-				file:close()
-			end
+			dirlist[i] = dirlist[i]..(isdir(file) and ",<dir>" or ","..btoh(file:seek("end")))
+			file:close()
 		else
 			dirlist[i] = dirlist[i]..",<error>"
 		end
