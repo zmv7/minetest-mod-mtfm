@@ -1,1 +1,1 @@
-mtfm.read_only (Read only mode) bool false
+lc.read_only (Read only mode) bool false
